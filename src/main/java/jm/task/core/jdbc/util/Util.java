@@ -10,6 +10,7 @@ public class Util {
 
     private static Connection conn;
     private static Statement statement;
+
     public static Connection getMySQLConnection() throws SQLException,
             ClassNotFoundException {
         String hostName = "localhost";
@@ -25,7 +26,7 @@ public class Util {
 
         String connectionURL = "jdbc:mysql://" + hostName + ":3306/" + dbName + "?serverTimezone=UTC&useSSL=false";
 
-        if(conn==null) {
+        if (conn == null) {
             conn = DriverManager.getConnection(connectionURL, userName,
                     password);
         }
@@ -33,7 +34,7 @@ public class Util {
     }
 
     public static Statement getStatement() throws SQLException, ClassNotFoundException {
-        if(statement==null){
+        if (statement == null) {
             statement = getMySQLConnection().createStatement();
         }
         return statement;
