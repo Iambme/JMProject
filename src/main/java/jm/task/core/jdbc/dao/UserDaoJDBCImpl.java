@@ -22,8 +22,8 @@ public class UserDaoJDBCImpl implements UserDao {
 
         try {
             Util.getStatement().executeUpdate(SQL);
-        } catch (Exception throwables) {
-            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         System.out.println("таблица users создана ");
     }
@@ -32,8 +32,8 @@ public class UserDaoJDBCImpl implements UserDao {
         String SQL = "DROP TABLE if exists users";
         try {
             Util.getStatement().executeUpdate(SQL);
-        } catch (Exception throwables) {
-            throwables.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         System.out.println("таблица users удалена ");
     }
