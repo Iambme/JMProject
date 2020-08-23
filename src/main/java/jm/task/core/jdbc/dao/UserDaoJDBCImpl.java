@@ -3,6 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 " PRIMARY KEY (id))";
 
         try {
-            Util.getStatement().executeUpdate(SQL);
+            Util.getMySQLConnection().createStatement().executeUpdate(SQL);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -31,7 +32,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void dropUsersTable() {
         String SQL = "DROP TABLE if exists users";
         try {
-            Util.getStatement().executeUpdate(SQL);
+            Util.getMySQLConnection().createStatement().executeUpdate(SQL);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,7 +42,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         String SQL = String.format("INSERT INTO users (name, lastname, age) values ('%s', '%s', %d)", name, lastName, age);
         try {
-            Util.getStatement().executeUpdate(SQL);
+            Util.getMySQLConnection().createStatement().executeUpdate(SQL);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,9 +50,12 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        String SQL = "DELETE FROM users WHERE id = " + id;
+        String SQL = "DELETE FROM users WHERE id = ?";
+        PreparedStatement preparedStatement;
         try {
-            int count = Util.getStatement().executeUpdate(SQL);
+            preparedStatement = Util.getMySQLConnection().prepareStatement(SQL);
+            preparedStatement.setInt(1,(int)id);
+            int count = preparedStatement.executeUpdate(SQL);
             if (count == 1) {
                 System.out.println("user с id "+ id +" удалён ");
             }
@@ -66,7 +70,7 @@ public class UserDaoJDBCImpl implements UserDao {
         ResultSet rs;
         List<User> userList = new LinkedList<>();
         try {
-            rs = Util.getStatement().executeQuery(SQL);
+            rs = Util.getMySQLConnection().createStatement().executeQuery(SQL);
             while (rs.next()) {
                 User user = new User(rs.getString("name"), rs.getString("lastname"), rs.getByte("age"));
                 userList.add(user);
@@ -80,7 +84,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public void cleanUsersTable() {
         String SQL = "DELETE FROM users";
         try {
-            int count = Util.getStatement().executeUpdate(SQL);
+            int count = Util.getMySQLConnection().createStatement().executeUpdate(SQL);
             if (count != 0) {
                 System.out.println("Таблица users очищена ");
             }

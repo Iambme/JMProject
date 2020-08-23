@@ -1,12 +1,12 @@
 package jm.task.core.jdbc.util;
 
 
-
 import jm.task.core.jdbc.model.User;
 
 import org.hibernate.SessionFactory;
 
 import org.hibernate.cfg.Configuration;
+
 import java.sql.Connection;
 
 import java.sql.DriverManager;
@@ -43,15 +43,7 @@ public class Util {
         return conn;
     }
 
-    public static Statement getStatement() throws SQLException, ClassNotFoundException {
-        if (statement == null) {
-            statement = getMySQLConnection().createStatement();
-        }
-        return statement;
-    }
-
-
-    public static SessionFactory getSessionFactoryWithoutXML(){
+    public static SessionFactory getSessionFactoryWithoutXML() {
         if (sessionFactory == null) {
             Properties prop = new Properties();
             prop.setProperty("hibernate.connection.url", "jdbc:mysql://localhost/testschema?useSSL=false&serverTimezone=UTC");
@@ -61,12 +53,12 @@ public class Util {
             prop.setProperty("hibernate.connection.driver_class", "com.mysql.cj.jdbc.Driver");
 
             prop.setProperty("show_sql", String.valueOf(true));
-            prop.setProperty("hibernate.hbm2ddl.auto","update");
+            prop.setProperty("hibernate.hbm2ddl.auto", "update");
             configuration = new Configuration();
             configuration.addProperties(prop);
             configuration.addAnnotatedClass(User.class);
 
-           sessionFactory = configuration.buildSessionFactory();
+            sessionFactory = configuration.buildSessionFactory();
         }
 
         return sessionFactory;
