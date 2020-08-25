@@ -3,14 +3,24 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    public UserDaoJDBCImpl() {
+    Connection connection = null;
 
+    public UserDaoJDBCImpl() {
+        try {
+            connection = Util.getMySQLConnection();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public void createUsersTable() {
@@ -22,8 +32,8 @@ public class UserDaoJDBCImpl implements UserDao {
                 " PRIMARY KEY (id))";
 
         try {
-            Util.getMySQLConnection().createStatement().executeUpdate(SQL);
-        } catch (Exception e) {
+            connection.createStatement().executeUpdate(SQL);
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         System.out.println("таблица users создана ");
@@ -32,34 +42,41 @@ public class UserDaoJDBCImpl implements UserDao {
     public void dropUsersTable() {
         String SQL = "DROP TABLE if exists users";
         try {
-            Util.getMySQLConnection().createStatement().executeUpdate(SQL);
-        } catch (Exception e) {
+            connection.createStatement().executeUpdate(SQL);
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         System.out.println("таблица users удалена ");
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        String SQL = String.format("INSERT INTO users (name, lastname, age) values ('%s', '%s', %d)", name, lastName, age);
+        String SQL = "INSERT INTO users (name, lastname, age) values (?, ?, ?)";
         try {
-            Util.getMySQLConnection().createStatement().executeUpdate(SQL);
-        } catch (Exception e) {
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setString(1,name);
+            preparedStatement.setString(2,lastName);
+            preparedStatement.setInt(3,age);
+            int val = preparedStatement.executeUpdate();
+            if (val == 1) {
+                System.out.println("user c именем " + name + " добавлен в таблицу ");
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("user c именем "+ name +" добавлен в таблицу ");
+
     }
 
     public void removeUserById(long id) {
         String SQL = "DELETE FROM users WHERE id = ?";
         PreparedStatement preparedStatement;
         try {
-            preparedStatement = Util.getMySQLConnection().prepareStatement(SQL);
-            preparedStatement.setInt(1,(int)id);
-            int count = preparedStatement.executeUpdate(SQL);
+            preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, (int) id);
+            int count = preparedStatement.executeUpdate();
             if (count == 1) {
-                System.out.println("user с id "+ id +" удалён ");
+                System.out.println("user с id " + id + " удалён ");
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -70,12 +87,12 @@ public class UserDaoJDBCImpl implements UserDao {
         ResultSet rs;
         List<User> userList = new LinkedList<>();
         try {
-            rs = Util.getMySQLConnection().createStatement().executeQuery(SQL);
+            rs = connection.createStatement().executeQuery(SQL);
             while (rs.next()) {
                 User user = new User(rs.getString("name"), rs.getString("lastname"), rs.getByte("age"));
                 userList.add(user);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return userList;
@@ -84,11 +101,11 @@ public class UserDaoJDBCImpl implements UserDao {
     public void cleanUsersTable() {
         String SQL = "DELETE FROM users";
         try {
-            int count = Util.getMySQLConnection().createStatement().executeUpdate(SQL);
+            int count = connection.createStatement().executeUpdate(SQL);
             if (count != 0) {
                 System.out.println("Таблица users очищена ");
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 

@@ -4,7 +4,9 @@ import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
+import javax.persistence.RollbackException;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -24,102 +26,94 @@ public class UserDaoHibernateImpl implements UserDao {
                 " lastname VARCHAR (50), " +
                 " age SMALLINT not NULL, " +
                 " PRIMARY KEY (id))";
-        Session session = null;
-        try {
-            session = sessionFactory.openSession();
-            session.beginTransaction();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
             session.createSQLQuery(SQL).executeUpdate();
-            session.getTransaction().commit();
+            tx.commit();
             System.out.println("таблица users создана ");
-        } catch (Exception e) {
+        } catch (IllegalStateException | RollbackException e) {
             e.printStackTrace();
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
+            if (tx != null) {
+                tx.rollback();
+            }
         }
     }
 
     @Override
     public void dropUsersTable() {
         String SQL = "DROP TABLE if exists users";
-        Session session = null;
-        try {
-            sessionFactory = Util.getSessionFactoryWithoutXML();
-            session = sessionFactory.openSession();
-            session.beginTransaction();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
             session.createSQLQuery(SQL).executeUpdate();
-            session.getTransaction().commit();
+            tx.commit();
             System.out.println("таблица users удалена ");
-
-        } catch (Exception e) {
+        } catch (IllegalStateException | RollbackException e) {
             e.printStackTrace();
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
+            if (tx != null) {
+                tx.rollback();
+            }
+
         }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
 
-        Session session = null;
-        try {
-
-
-            session = Util.getSessionFactoryWithoutXML().openSession();
-            session.beginTransaction();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
             User user = new User(name, lastName, age);
             session.save(user);
-            session.getTransaction().commit();
+            tx.commit();
             System.out.println("user c именем " + name + " добавлен в таблицу ");
-        } catch (Exception e) {
+        } catch (IllegalStateException | RollbackException e) {
             e.printStackTrace();
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
+            if (tx != null) {
+                tx.rollback();
+            }
+
         }
     }
 
     @Override
     public void removeUserById(long id) {
-        Session session = null;
-        try {
-            session = Util.getSessionFactoryWithoutXML().openSession();
-
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
             User user = session.get(User.class, id);
-            session.beginTransaction();
             session.delete(user);
-            session.getTransaction().commit();
+            tx.commit();
             System.out.println("user с id " + id + " удалён ");
-        } catch (Exception e) {
+        } catch (IllegalStateException | RollbackException e) {
             e.printStackTrace();
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
+            if (tx != null) {
+                tx.rollback();
+            }
         }
     }
 
     @Override
     public List<User> getAllUsers() {
-        List<User> users = (List<User>) Util.getSessionFactoryWithoutXML().openSession().createQuery("from users").list();
+        List<User> users = (List<User>) sessionFactory.openSession().createQuery("from users").list();
         return users;
     }
 
     @Override
     public void cleanUsersTable() {
         String SQL = "DELETE FROM users";
-        Session session = null;
-        try {
-            session = Util.getSessionFactoryWithoutXML().openSession();
-            session.beginTransaction();
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
             session.createQuery(SQL).executeUpdate();
-            session.getTransaction().commit();
+            tx.commit();
             System.out.println("Таблица users очищена ");
-        } catch (Exception e) {
+        } catch (IllegalStateException | RollbackException e) {
             e.printStackTrace();
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
+            if (tx != null) {
+                tx.rollback();
+            }
         }
     }
 

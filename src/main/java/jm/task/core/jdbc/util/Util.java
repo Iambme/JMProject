@@ -32,9 +32,9 @@ public class Util {
         return getMySQLConnection(hostName, dbName, userName, password);
     }
 
-    public static Connection getMySQLConnection(String hostName, String dbName, String userName, String password) throws ClassNotFoundException, SQLException {
+    public static Connection getMySQLConnection(String hostName, String dbName, String userName, String password) throws SQLException {
 
-        String connectionURL = "jdbc:mysql://" + hostName + ":3306/" + dbName + "?serverTimezone=UTC&useSSL=false";
+        String connectionURL = "jdbc:mysql://" + hostName + ":3306/" + dbName + "?serverTimezone=UTC";
 
         if (conn == null) {
             conn = DriverManager.getConnection(connectionURL, userName,
