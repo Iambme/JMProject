@@ -65,7 +65,6 @@ public class UserDaoJDBCImpl implements UserDao {
         String SQL = "SELECT * FROM USERS";
         ResultSet rs;
         List<User> userList = new LinkedList<>();
-
         try {
             rs = Util.getStatement().executeQuery(SQL);
             while (rs.next()) {
